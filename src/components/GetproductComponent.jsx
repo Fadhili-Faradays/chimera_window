@@ -9,7 +9,7 @@ const GetproductComponent = ()=>{
     let[error,setError]=useState("");
     // base url for  images from server
 
-    const img_url = "https://dmuturi.alwaysdata.net/static/images/"
+    const img_url = "https://faradays.alwaysdata.net/static/images/"
  
     let navigator =useNavigate();
 
@@ -20,7 +20,7 @@ const GetproductComponent = ()=>{
         setLoading("Fetching products. Please wait ...")
 
         try {
-            const response = await axios.get("https://dmuturi.alwaysdata.net/api/get_products")
+            const response = await axios.get("https://faradays.alwaysdata.net/api/get_products")
             console.log(response)
 
             if(response.status===200){

@@ -29,7 +29,7 @@ const AddproductComponent =()=>{
             product_data.append("product_image",product_image)
             
             const response = await axios.post(
-                "https://dmuturi.alwaysdata.net/api/add_product", product_data
+                "https://faradays.alwaysdata.net/api/add_product", product_data
             )
             console.log(response)
             if (response.status===200)
@@ -84,10 +84,11 @@ const AddproductComponent =()=>{
                      }}
                     >
                         <option value="">Select Category</option>
-                        <option value="televisions">Electronics</option>
+                        <option value="televisions">Televisions</option>
                         <option value="phones">Phones</option>
                         <option value="laptops">Laptops</option>
-                        <option value="accessories">Accessoriess</option>
+                        <option value="clothes">Clothes</option>
+                        <option value="shoes">Shoes</option>
                          
                     </select>
                     <br />

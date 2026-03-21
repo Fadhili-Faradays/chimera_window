@@ -26,7 +26,7 @@ const MakepaymentComponent =()=>{
             data.append("phone",phone);
 
             const response = await axios.post(
-                "https://dmuturi.alwaysdata.net/api/mpesa_payment",
+                "https://faradays.alwaysdata.net/api/mpesa_payment",
                 data
             );
             console.log(response);

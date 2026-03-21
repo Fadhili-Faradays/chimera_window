@@ -31,7 +31,7 @@ const SignupComponent =()=>{
 
             // use axios to send data to server 
            const response = await axios.post(
-            "https://dmuturi.alwaysdata.net/api/signup",user_data);
+            "https://faradays.alwaysdata.net/api/signup",user_data);
 
            console.log(response);
            if(response.status === 200){
