@@ -83,13 +83,13 @@ const AddproductComponent =()=>{
                         setProductCategory(e.target.value)
                      }}
                     >
-                        <option value="">Select Category</option>
-                        <option value="televisions">Televisions</option>
-                        <option value="phones">Phones</option>
-                        <option value="laptops">Laptops</option>
-                        <option value="clothes">Clothes</option>
+                         <option value="">Select Category</option>
+                        <option value="shirts">Shirts</option>
+                        <option value="t-shirts">T-Shirts</option>
+                        <option value="jackets">Jackets</option>
+                        <option value="trousers">Trousers</option>
                         <option value="shoes">Shoes</option>
-                         
+                        
                     </select>
                     <br />
 

@@ -5,7 +5,7 @@ const NavbarComponent =()=>{
     
     return(
         <nav className="navbar navbar-expand-lg">
-            <Link className="navbar-brand" to="/">Sokogarden</Link>
+            <Link className="navbar-brand" to="/">Chimera</Link>
 
             <button className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span className="navbar-toggler-icon"></span>

@@ -16,7 +16,7 @@ function App() {
       <div className="App">
         <NavbarComponent/>
         <header className="App-header">
-         <h1>Sokogarden - Buy & Sell Online</h1>
+         <h1>Chimera - Window Shopping Online</h1>
         </header>
 
       <Routes>
