@@ -20,13 +20,13 @@ const SignupComponent =()=>{
         updateSuccess("");
         updateLoading("Submitting data. Please wait ...")
 
-        console.log(username, email, phonenumber, password)
+        console.log(username, email, phone, password)
  
         try {
             const user_data = new FormData()
             user_data.append("username", username)
             user_data.append("email", email)
-            user_data.append("phonenumber", phonenumber)
+            user_data.append("phone", phone)
             user_data.append("password", password);
 
             // use axios to send data to server 
