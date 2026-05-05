@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  
 }
 
 .App-logo {
@@ -13,16 +14,6 @@
   }
 }
 
-.App-header {
-  background-color: darkgreen;
-  min-height: 20vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
 
 .App-link {
   color: #61dafb;
@@ -37,13 +28,291 @@
   }
 }
 
-.product_img{
-  object-fit: contain;
-  width: 100%;
-  height: 200px;
+
+
+/* body */
+
+
+.header-container-override {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
-.product_img{
-  object-fit: contain;
-  height: 200px;
+
+
+
+
+/* HEADER CSS FOR MY WORK */
+.header {
+  height: 45vh; 
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(90deg, #283e57, #41657e, #46bc4c);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  
+  
+}
+
+/* Content wrapper */
+.header-content {
+  max-width: 100%;
+}
+
+/* Brand title */
+.brand {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+/* Tagline */
+.tagline {
+  font-size: 1.3rem;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+
+.header-content {
+  animation: fadeIn 1.2s ease-in-out;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+/* Navbar container */
+.navbar {
+  background: linear-gradient(90deg, #1565c0, #41657e, #43a047);
+  padding: 14px 24px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+/* Brand/logo */
+.navbar-brand {
+  color: #ffffff !important;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  transition: all 0.3s ease;
+}
+
+/* Glow + slight scale on hover */
+.navbar-brand:hover {
+  color: #bbdefb !important;
+  transform: scale(1.05);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* Nav links */
+.nav-link {
+  color: #ffffff !important;
+  margin-right: 18px;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 6px 4px;
+}
+
+/* Hover effect */
+.nav-link:hover {
+  color: #b2dfdb !important;
+  transform: translateY(-2px);
+}
+
+/* Underline animation (gradient) */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 3px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, #64b5f6, #69f0ae);
+  border-radius: 2px;
+  transition: width 0.35s ease;
+}
+
+.nav-link:hover::after {
   width: 100%;
 }
+
+/* Right side buttons */
+.navbar .btn.nav-link {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Username styling */
+.navbar .nav-link:first-child {
+  font-weight: 600;
+  color: #e3f2fd !important;
+}
+
+/* Mobile toggle button */
+.navbar-toggler {
+  border: none;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+/* Toggle hover effect */
+.navbar-toggler:hover {
+  transform: rotate(90deg);
+}
+
+/* Custom hamburger icon color */
+.navbar-toggler-icon {
+  filter: invert(1) brightness(1.5);
+}
+
+/* Responsive spacing */
+@media (max-width: 768px) {
+  .nav-link {
+    margin: 12px 0;
+    text-align: center;
+  }
+
+  .navbar {
+    padding: 12px;
+  }
+}
+
+
+
+
+
+/* FOOOTER STYLING */
+.footer {
+  background: #1f2a44;
+  color: #fff;
+  padding: 40px 20px 10px;
+  margin-top: 40px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-section h2,
+.footer-section h3 {
+  margin-bottom: 10px;
+}
+
+.footer-section p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* Social icons */
+.social-icons a {
+  color: white;
+  font-size: 1.5rem;
+  margin-right: 15px;
+  transition: 0.3s;
+}
+
+.social-icons a:hover {
+  color: #4f6fc2;
+}
+
+/* Bottom bar */
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 10px;
+  font-size: 0.9rem;
+}
+
+
+
+
+
+
+
+
+/* CSS DEALING ON THE CARD FOR UNIFORMITY */
+
+.product-card {
+  height: 450px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+ /* card hovering effect */
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+/* Image of the Product */
+.product_img {
+  height: 200px; 
+  width: 100%;
+  object-fit: cover; 
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.card-body {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  background: linear-gradient(90deg, #6c7074, #dae8e2);
+}
+
+.card-body h5 {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.card-body p {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  flex-grow: 1; /* make description area flexible */
+}
+
+.card-body button {
+  margin-top: 10px;
+}
+
+
+
+
+
+
+
+/* FORMS */
+
+
+
