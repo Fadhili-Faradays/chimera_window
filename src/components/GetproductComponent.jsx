@@ -1,6 +1,7 @@
 import axios from "axios";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext";
 
 const GetproductComponent = ()=>{
 
@@ -23,6 +24,7 @@ const GetproductComponent = ()=>{
     const img_url = "https://faradays.alwaysdata.net/static/images/"
  
     let navigator =useNavigate();
+    const { addToCart } = useContext(CartContext);
 
 //create function to fetch products from backend api
 
@@ -95,6 +97,9 @@ const GetproductComponent = ()=>{
                         <b className="text-warning">{product.product_cost}</b>
                         <br />
                         <br />
+                        <button className="btn btn-primary me-2" 
+                        onClick={() => addToCart(product)}>
+                        Add to Cart</button>
                         <button className="btn btn-dark" 
                         onClick={()=>{navigator("/makepayment",{state: { product } });
                         }}>

@@ -1,17 +1,15 @@
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import GetproductComponent from './components/GetproductComponent';
 import AddproductComponent from './components/AddproductComponent';
 import SigninComponent from './components/SigninComponent';
 import SignupComponent from './components/SignupComponent';
 import MakepaymentComponent from './components/Makepayment';
-<<<<<<< HEAD
-import NavbarComponent from './components/NavbarComponment';
+import NavbarComponent from './components/NavbarComponent';
 import AccountComponent from './components/AccountComponent';
-=======
-import NavbarComponent from './components/NavbarComponent'; // fixed import name
->>>>>>> 618135bd4f26ecadbeae59b28a65d4b1423560cf
+import CartComponent from './components/CartComponent';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { useContext } from 'react';
@@ -36,57 +34,39 @@ const RequireEmployee = ({ children }) => {
 
 function App() {
   return (
-<<<<<<< HEAD
     <AuthProvider>
-      <BrowserRouter>
-        <div className="container-fluid">
-          <div className="App">
-            <NavbarComponent />
-            <header className="App-header">
-              <h1>Chimera - Window Shopping Online</h1>
-            </header>
+      <CartProvider>
+        <BrowserRouter>
+          <div className="container-fluid">
+            <div className="App">
+              <NavbarComponent />
+              <header className="App-header">
+                <h1>Chimera - Window Shopping Online</h1>
+              </header>
 
-            <Routes>
-              <Route path='/' element={<GetproductComponent />} />
-              <Route path='/addproduct' element={
-                <RequireEmployee>
-                  <AddproductComponent />
-                </RequireEmployee>
-              } />
-              <Route path='/account' element={
-                <RequireAuth>
-                  <AccountComponent />
-                </RequireAuth>
-              } />
-              <Route path='/signin' element={<SigninComponent />} />
-              <Route path='/signup' element={<SignupComponent />} />
-              <Route path='/makepayment' element={<MakepaymentComponent />} />
-              <Route path='*' element={<Navigate to='/' replace />} />
-            </Routes>
+              <Routes>
+                <Route path='/' element={<GetproductComponent />} />
+                <Route path='/addproduct' element={
+                  <RequireEmployee>
+                    <AddproductComponent />
+                  </RequireEmployee>
+                } />
+                <Route path='/account' element={
+                  <RequireAuth>
+                    <AccountComponent />
+                  </RequireAuth>
+                } />
+                <Route path='/cart' element={<CartComponent />} />
+                <Route path='/signin' element={<SigninComponent />} />
+                <Route path='/signup' element={<SignupComponent />} />
+                <Route path='/makepayment' element={<MakepaymentComponent />} />
+                <Route path='*' element={<Navigate to='/' replace />} />
+              </Routes>
+            </div>
           </div>
-        </div>
-      </BrowserRouter>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
-=======
-    <BrowserRouter>
-     <div className="container-fluid">
-      <div className="App">
-        <NavbarComponent/>
-        <header className="App-header">
-         <h1>Chimera - Window Shopping Online</h1>
-        </header>
-
-      <Routes>
-            <Route path='/' element={<GetproductComponent/>} />
-            <Route path='/addproduct' element={<AddproductComponent/>} />
-            <Route path='/signin' element={<SigninComponent/>} />
-            <Route path='/signup' element={<SignupComponent/>} />
-            <Route path='/makepayment' element={<MakepaymentComponent/>} />
-      </Routes>
-      </div>
-     </div>
-    </BrowserRouter>
->>>>>>> 618135bd4f26ecadbeae59b28a65d4b1423560cf
   );
 }
 

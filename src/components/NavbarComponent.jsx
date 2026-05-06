@@ -1,9 +1,11 @@
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext";
 
 const NavbarComponent = () => {
   const { auth, signout } = useContext(AuthContext);
+  const { cart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleSignOut = () => {
@@ -28,6 +30,7 @@ const NavbarComponent = () => {
               ) : (
                 <Link className="nav-link" to="/">Products</Link>
               )}
+              <Link className="nav-link" to="/cart">Cart ({cart.length})</Link>
               <Link className="nav-link" to="/account">My Account</Link>
             </>
           ) : (
