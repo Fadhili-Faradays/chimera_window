@@ -10,6 +10,7 @@ import MakepaymentComponent from './components/Makepayment';
 import NavbarComponent from './components/NavbarComponent';
 import AccountComponent from './components/AccountComponent';
 import CartComponent from './components/CartComponent';
+import FooterComponent from './components/FooterComponent';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import { useContext } from 'react';
@@ -62,6 +63,7 @@ function App() {
                 <Route path='/makepayment' element={<MakepaymentComponent />} />
                 <Route path='*' element={<Navigate to='/' replace />} />
               </Routes>
+              <FooterComponent />
             </div>
           </div>
         </BrowserRouter>

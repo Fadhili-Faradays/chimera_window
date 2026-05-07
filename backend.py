@@ -124,15 +124,19 @@ def add_product():
 
 @app.route("/api/get_products", methods=["GET"])
 def get_products():
-    connection = get_db_connection("employee")
-    cursor = connection.cursor()
-    sql = "SELECT * FROM product_details"
-    cursor.execute(sql)
-    products = cursor.fetchall()
-    cursor.close()
-    connection.close()
+    try:
+        connection = get_db_connection("employee")
+        cursor = connection.cursor()
+        sql = "SELECT * FROM product_details"
+        cursor.execute(sql)
+        products = cursor.fetchall()
+        cursor.close()
+        connection.close()
 
-    return jsonify(products)
+        return jsonify(products)
+    except Exception as e:
+        print(f"Error fetching products: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 
 @app.route("/api/user_account", methods=["GET"])
