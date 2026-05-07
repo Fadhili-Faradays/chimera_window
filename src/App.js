@@ -46,7 +46,11 @@ function App() {
               </header>
 
               <Routes>
-                <Route path='/' element={<GetproductComponent />} />
+                <Route path='/' element={
+                  <RequireAuth>
+                    <GetproductComponent />
+                  </RequireAuth>
+                } />
                 <Route path='/addproduct' element={
                   <RequireEmployee>
                     <AddproductComponent />
@@ -57,10 +61,18 @@ function App() {
                     <AccountComponent />
                   </RequireAuth>
                 } />
-                <Route path='/cart' element={<CartComponent />} />
+                <Route path='/cart' element={
+                  <RequireAuth>
+                    <CartComponent />
+                  </RequireAuth>
+                } />
                 <Route path='/signin' element={<SigninComponent />} />
                 <Route path='/signup' element={<SignupComponent />} />
-                <Route path='/makepayment' element={<MakepaymentComponent />} />
+                <Route path='/makepayment' element={
+                  <RequireAuth>
+                    <MakepaymentComponent />
+                  </RequireAuth>
+                } />
                 <Route path='*' element={<Navigate to='/' replace />} />
               </Routes>
               <FooterComponent />

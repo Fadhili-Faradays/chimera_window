@@ -27,7 +27,7 @@ const FooterComponent = () => {
         <hr />
         <div className="row">
           <div className="col-12 text-center">
-            <p>&copy; 2024 Chimera Window. All rights reserved.</p>
+            <p>&copy; 2026 Chimera Window. All rights reserved.</p>
           </div>
         </div>
       </div>
