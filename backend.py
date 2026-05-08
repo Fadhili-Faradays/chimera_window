@@ -33,7 +33,9 @@ def get_db_connection(role="user"):
 
 
 def get_request_data():
-    return request.get_json() or request.form or {}
+    if request.is_json:
+        return request.get_json()
+    return request.form
 
 
 @app.route("/api/signup", methods=["POST"])

@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
+import { FavoritesContext } from "../context/FavoritesContext";
 
 const GetproductComponent = ()=>{
 
@@ -21,6 +22,7 @@ const GetproductComponent = ()=>{
     let navigator =useNavigate();
     const { addToCart } = useContext(CartContext);
     const { auth } = useContext(AuthContext);
+    const { addToFavorites, removeFromFavorites, isFavorite } = useContext(FavoritesContext);
 
 //create function to fetch products from backend api
 
@@ -74,6 +76,20 @@ const GetproductComponent = ()=>{
                         <h5 className="mt-2">{product.product_name}</h5>
                         <p className="text-muted">{product.product_description}</p>
                         <b className="text-warning">{product.product_cost}</b>
+                        <br />
+                        <br />
+                        <button
+                            className={`btn me-2 ${isFavorite(product.id) ? 'btn-danger' : 'btn-outline-danger'}`}
+                            onClick={() => {
+                                if (isFavorite(product.id)) {
+                                    removeFromFavorites(product.id);
+                                } else {
+                                    addToFavorites(product);
+                                }
+                            }}
+                        >
+                            {isFavorite(product.id) ? '❤️ Favorited' : '🤍 Add to Favorites'}
+                        </button>
                         <br />
                         <br />
                         {auth.role === 'user' && (

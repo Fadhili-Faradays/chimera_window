@@ -28,7 +28,10 @@ const NavbarComponent = () => {
               {auth.role === 'employee' ? (
                 <Link className="nav-link" to="/addproduct">Add Product</Link>
               ) : (
-                <Link className="nav-link" to="/">Products</Link>
+                <>
+                  <Link className="nav-link" to="/">Products</Link>
+                  <Link className="nav-link" to="/favorites">Favorites</Link>
+                </>
               )}
               <Link className="nav-link" to="/cart">Cart ({cart.length})</Link>
               <Link className="nav-link" to="/account">My Account</Link>
