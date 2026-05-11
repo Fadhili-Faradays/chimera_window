@@ -1,5 +1,6 @@
 export const CATEGORIES = [
   { value: "shirts", label: "Shirts", description: "Discover casual and smart shirts for every occasion, from work to weekend outings." },
+  { value: "shorts", label: "Shorts", description: "Shop comfortable shorts for casual wear, workouts, or warm-weather days." },
   { value: "t-shirts", label: "T-Shirts", description: "Browse printed and basic tees perfect for layering or wearing on their own." },
   { value: "jackets", label: "Jackets", description: "Find lightweight and warm jackets to keep you comfortable in changing weather." },
   { value: "trousers", label: "Trousers", description: "Choose from classic and modern trousers designed for comfort and style." },

@@ -68,6 +68,10 @@ const GetproductComponent = ()=>{
         setFilteredProducts(filterProducts);
     },[search_word, products, category]);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [category]);
+
     const categoryData = category
       ? CATEGORIES.find((item) => item.value.toLowerCase() === category.toLowerCase()) || { label: category, description: "Browse products within this category." }
       : null;
@@ -109,7 +113,6 @@ const GetproductComponent = ()=>{
                     <div className="card-body">
                         <h5 className="mt-2">{product.product_name}</h5>
                         <p className="text-muted">{product.product_description}</p>
-                        <p className="text-info">Sold by: {product.seller_name || 'Unknown Seller'}</p>
                         <b className="text-warning">{product.product_cost}</b>
                         <br />
                         <br />

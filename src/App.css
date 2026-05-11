@@ -333,4 +333,33 @@
 /* FORMS */
 
 
+/* Scrollable Dropdown Menu */
+.dropdown-menu {
+  max-height: 400px;
+  min-width: 180px;
+  width: 220px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth scrolling for dropdown */
+.dropdown-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
 
