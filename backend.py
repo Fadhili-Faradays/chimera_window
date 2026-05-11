@@ -105,8 +105,9 @@ def add_product():
     product_category = request.form.get("product_category")
     product_description = request.form.get("product_description")
     product_image = request.files.get("product_image")
+    employee_id = request.form.get("employee_id")
 
-    if not product_name or not product_cost or not product_category or not product_description or not product_image:
+    if not product_name or not product_cost or not product_category or not product_description or not product_image or not employee_id:
         return jsonify({"message": "All product fields are required."}), 400
 
     image_name = product_image.filename
@@ -115,8 +116,8 @@ def add_product():
 
     connection = get_db_connection("employee")
     cursor = connection.cursor()
-    sql = "INSERT INTO product_details (product_name, product_description, product_category, product_cost, product_image) VALUES (%s, %s, %s, %s, %s)"
-    cursor.execute(sql, (product_name, product_description, product_category, product_cost, image_name))
+    sql = "INSERT INTO product_details (product_name, product_description, product_category, product_cost, product_image, employee_id) VALUES (%s, %s, %s, %s, %s, %s)"
+    cursor.execute(sql, (product_name, product_description, product_category, product_cost, image_name, employee_id))
     connection.commit()
     cursor.close()
     connection.close()
@@ -129,7 +130,11 @@ def get_products():
     try:
         connection = get_db_connection("employee")
         cursor = connection.cursor()
-        sql = "SELECT * FROM product_details"
+        sql = """
+        SELECT pd.*, e.username as seller_name
+        FROM product_details pd
+        LEFT JOIN employees e ON pd.employee_id = e.employee_id
+        """
         cursor.execute(sql)
         products = cursor.fetchall()
         cursor.close()

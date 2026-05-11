@@ -1,5 +1,7 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { CATEGORIES } from "../constants/categories";
+import { AuthContext } from "../context/AuthContext";
 
 const AddproductComponent =()=>{
     let [product_name, setProductName] = useState("");
@@ -11,6 +13,8 @@ const AddproductComponent =()=>{
     let[loading,setLoading] = useState("");
     let [success,setSuccess] = useState("");
     let[error,setError] = useState("");
+
+    const { auth } = useContext(AuthContext);
 
     const handleSubmit = async (e) => {
         
@@ -27,6 +31,7 @@ const AddproductComponent =()=>{
             product_data.append("product_category",product_category)
             product_data.append("product_description",product_description)
             product_data.append("product_image",product_image)
+            product_data.append("employee_id", auth.user.id)
             
             const response = await axios.post(
                 "https://faradays.alwaysdata.net/api/add_product", product_data
@@ -84,12 +89,11 @@ const AddproductComponent =()=>{
                      }}
                     >
                          <option value="">Select Category</option>
-                        <option value="shirts">Shirts</option>
-                        <option value="t-shirts">T-Shirts</option>
-                        <option value="jackets">Jackets</option>
-                        <option value="trousers">Trousers</option>
-                        <option value="shoes">Shoes</option>
-                        
+                        {CATEGORIES.map((category) => (
+                          <option key={category.value} value={category.value}>
+                            {category.label}
+                          </option>
+                        ))}
                     </select>
                     <br />
 

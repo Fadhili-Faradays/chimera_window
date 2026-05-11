@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
+import { CATEGORIES } from "../constants/categories";
 
 const NavbarComponent = () => {
   const { auth, signout } = useContext(AuthContext);
@@ -26,10 +27,38 @@ const NavbarComponent = () => {
           {auth.isSignedIn ? (
             <>
               {auth.role === 'employee' ? (
-                <Link className="nav-link" to="/addproduct">Add Product</Link>
+                <>
+                  <Link className="nav-link" to="/employee-catalogue">My Catalogue</Link>
+                  <Link className="nav-link" to="/addproduct">Add Product</Link>
+                </>
               ) : (
                 <>
                   <Link className="nav-link" to="/">Products</Link>
+                  <div className="nav-item dropdown">
+                    <button
+                      className="nav-link dropdown-toggle btn btn-link"
+                      id="categoryDropdown"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      Categories
+                    </button>
+                    <ul className="dropdown-menu" aria-labelledby="categoryDropdown">
+                      {CATEGORIES.map((category) => (
+                        <li key={category.value}>
+                          <Link className="dropdown-item" to={`/category/${category.value}`}>
+                            {category.label}
+                          </Link>
+                        </li>
+                      ))}
+                      <li><hr className="dropdown-divider" /></li>
+                      <li>
+                        <Link className="dropdown-item" to="/">
+                          All products
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                   <Link className="nav-link" to="/favorites">Favorites</Link>
                 </>
               )}

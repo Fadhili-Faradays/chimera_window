@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import GetproductComponent from './components/GetproductComponent';
 import AddproductComponent from './components/AddproductComponent';
+import EmployeeCatalogueComponent from './components/EmployeeCatalogueComponent';
 import SigninComponent from './components/SigninComponent';
 import SignupComponent from './components/SignupComponent';
 import MakepaymentComponent from './components/Makepayment';
@@ -55,9 +56,19 @@ function App() {
                       <GetproductComponent />
                     </RequireAuth>
                   } />
+                  <Route path='/category/:category' element={
+                    <RequireAuth>
+                      <GetproductComponent />
+                    </RequireAuth>
+                  } />
                   <Route path='/addproduct' element={
                     <RequireEmployee>
                       <AddproductComponent />
+                    </RequireEmployee>
+                  } />
+                  <Route path='/employee-catalogue' element={
+                    <RequireEmployee>
+                      <EmployeeCatalogueComponent />
                     </RequireEmployee>
                   } />
                   <Route path='/account' element={

@@ -28,14 +28,25 @@ def create_tables():
             product_category VARCHAR(100),
             product_cost DECIMAL(10, 2) NOT NULL,
             product_image VARCHAR(255),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            employee_id INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
         )
         """
 
         cursor.execute(create_table_sql)
         connection.commit()
 
-        print("Table 'product_details' created successfully (or already exists)")
+        # Alter table to add employee_id if it doesn't exist
+        try:
+            alter_sql = "ALTER TABLE product_details ADD COLUMN employee_id INT, ADD CONSTRAINT fk_employee FOREIGN KEY (employee_id) REFERENCES employees(employee_id)"
+            cursor.execute(alter_sql)
+            connection.commit()
+            print("Added employee_id column to product_details")
+        except Exception as e:
+            print(f"Column may already exist: {e}")
+
+        print("Table 'product_details' created or updated successfully")
 
         # Check if table has any data
         cursor.execute("SELECT COUNT(*) as count FROM product_details")
