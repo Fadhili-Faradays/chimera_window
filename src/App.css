@@ -19,6 +19,11 @@
   color: #61dafb;
 }
 
+body {
+  min-height: 100vh;
+  background: url('/public/background.png') center center / cover no-repeat fixed;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
