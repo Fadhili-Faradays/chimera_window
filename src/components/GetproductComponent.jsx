@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
@@ -72,9 +72,28 @@ const GetproductComponent = ()=>{
         window.scrollTo(0, 0);
     }, [category]);
 
-    const categoryData = category
-      ? CATEGORIES.find((item) => item.value.toLowerCase() === category.toLowerCase()) || { label: category, description: "Browse products within this category." }
-      : null;
+    const categoryData = useMemo(() => {
+      return category
+        ? CATEGORIES.find((item) => item.value.toLowerCase() === category.toLowerCase()) || { label: category, description: "Browse products within this category." }
+        : null;
+    }, [category]);
+
+    // Update background image based on category
+    useEffect(() => {
+        const bgImage = category && categoryData?.bgImage 
+            ? categoryData.bgImage 
+            : "background.png";
+        document.body.style.backgroundImage = `url('/public/${bgImage}')`;
+        document.body.style.backgroundAttachment = "fixed";
+        document.body.style.backgroundPosition = "center center";
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundRepeat = "no-repeat";
+
+        // Cleanup on unmount
+        return () => {
+            document.body.style.backgroundImage = "url('/public/background.png')";
+        };
+    }, [category, categoryData]);
 
     const groupedProducts = !category
       ? CATEGORIES.map((cat) => ({
@@ -95,7 +114,13 @@ const GetproductComponent = ()=>{
 
     return(
         <div className="row justify-content-center mt-4">
-            <div className="category-banner p-4 mb-4 rounded-3 text-start">
+            <div 
+              className="category-banner p-4 mb-4 rounded-3 text-start" 
+              style={categoryData && categoryData.bgColor ? {
+                background: `linear-gradient(135deg, ${categoryData.bgColor}dd, ${categoryData.bgColor}99)`,
+                color: "white"
+              } : {}}
+            >
               <h3 className="fw-bold mb-2">
                 {categoryData ? `Category: ${categoryData.label}` : "Available products"}
               </h3>
@@ -174,9 +199,15 @@ const GetproductComponent = ()=>{
             ) : (
               groupedProducts.map((section) => (
                 <div className="col-12 mb-5" key={section.category.value}>
-                  <div className="mb-3">
-                    <h4 className="fw-bold">{section.category.label}</h4>
-                    <p className="mb-2 text-muted">{section.category.description}</p>
+                  <div 
+                    className="category-section-header p-3 mb-3 rounded-2"
+                    style={section.category.bgColor ? {
+                      background: `linear-gradient(135deg, ${section.category.bgColor}cc, ${section.category.bgColor}88)`,
+                      color: "white"
+                    } : {}}
+                  >
+                    <h4 className="fw-bold mb-2">{section.category.label}</h4>
+                    <p className="mb-0 category-section-text">{section.category.description}</p>
                   </div>
                   <div className="row">
                     {section.products.map((product) => (
