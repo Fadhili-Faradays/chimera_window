@@ -54,8 +54,22 @@ export const CartProvider = ({ children }) => {
     setCart([]);
   }, []);
 
+  const cartCount = useMemo(
+    () => cart.reduce((count, item) => count + (item.quantity || 1), 0),
+    [cart]
+  );
+
+  const cartTotal = useMemo(
+    () =>
+      cart.reduce(
+        (sum, item) => sum + parseFloat(item.product_cost || 0) * (item.quantity || 1),
+        0
+      ),
+    [cart]
+  );
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, cartCount, cartTotal, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

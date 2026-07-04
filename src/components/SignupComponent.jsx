@@ -23,14 +23,14 @@ const SignupComponent =()=>{
         console.log(username, email, phonenumber, password)
  
         try {
-            const user_data = new FormData()
-            user_data.append("username", username)
-            user_data.append("email", email)
-            user_data.append("phonenumber", phonenumber)
-            user_data.append("password", password);
+            const user_data = {
+              username,
+              email,
+              phonenumber,
+              password,
+            };
 
-            // use axios to send data to server 
-           const response = await apiClient.post("/signup", user_data);
+            const response = await apiClient.post("/signup", user_data);
 
            console.log(response);
            if(response.status === 200){

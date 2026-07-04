@@ -4,10 +4,9 @@ const API_BASE = process.env.REACT_APP_API_BASE || "https://faradays.alwaysdata.
 
 const apiClient = axios.create({
   baseURL: API_BASE,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
+
+let unauthorizedInterceptor = null;
 
 export const setAuthToken = (token) => {
   if (token) {
@@ -15,6 +14,22 @@ export const setAuthToken = (token) => {
   } else {
     delete apiClient.defaults.headers.common["Authorization"];
   }
+};
+
+export const registerUnauthorizedHandler = (handler) => {
+  if (unauthorizedInterceptor !== null) {
+    apiClient.interceptors.response.eject(unauthorizedInterceptor);
+  }
+
+  unauthorizedInterceptor = apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        handler?.();
+      }
+      return Promise.reject(error);
+    }
+  );
 };
 
 export default apiClient;

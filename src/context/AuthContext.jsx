@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-import { setAuthToken } from "../apiClient";
+import { createContext, useEffect, useState, useCallback } from "react";
+import apiClient, { registerUnauthorizedHandler, setAuthToken } from "../apiClient";
 
 export const AuthContext = createContext({
   auth: {
@@ -13,33 +13,42 @@ export const AuthContext = createContext({
 });
 
 export const AuthProvider = ({ children }) => {
-
   const [auth, setAuth] = useState(() => {
     try {
       const saved = localStorage.getItem("chimera_auth");
-      const parsed = saved
-        ? JSON.parse(saved)
-        : { isSignedIn: false, role: null, user: null, token: null };
-      if (parsed?.token) {
-        setAuthToken(parsed.token);
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed && parsed.token && parsed.role && parsed.user) {
+        return parsed;
       }
-      return parsed;
+      return { isSignedIn: false, role: null, user: null, token: null };
     } catch (error) {
       return { isSignedIn: false, role: null, user: null, token: null };
     }
   });
-  
+
   useEffect(() => {
+    if (auth.token) {
+      setAuthToken(auth.token);
+    } else {
+      setAuthToken(null);
+    }
     localStorage.setItem("chimera_auth", JSON.stringify(auth));
-    setAuthToken(auth.token);
   }, [auth]);
+
+  const signout = useCallback(() => {
+    setAuth({ isSignedIn: false, role: null, user: null, token: null });
+    setAuthToken(null);
+    localStorage.removeItem("chimera_auth");
+  }, []);
+
+  useEffect(() => {
+    registerUnauthorizedHandler(() => {
+      signout();
+    });
+  }, [signout]);
 
   const signin = (authData) => {
     setAuth({ isSignedIn: true, ...authData });
-  };
-
-  const signout = () => {
-    setAuth({ isSignedIn: false, role: null, user: null, token: null });
   };
 
   return (

@@ -18,19 +18,16 @@ const SigninComponent = () => {
     setError("");
     setLoading("Signing in. Please wait ...");
 
-    const endpoint =
-      role === "employee"
-        ? "https://faradays.alwaysdata.net/api/employee_signin"
-        : "https://faradays.alwaysdata.net/api/user_signin";
+    const endpoint = role === "employee" ? "/employee_signin" : "/user_signin";
 
     try {
-      const response = await apiClient.post(endpoint.replace("https://faradays.alwaysdata.net/api", ""), { email, password });
+      const response = await apiClient.post(endpoint, { email, password });
 
       if (response.status === 200) {
         const payload = response.data || {};
         signin({
           role,
-          user: {
+          user: payload.user || {
             id: payload.id || payload.userId || null,
             username: payload.username || payload.name || payload.email || email,
             email: payload.email || email,

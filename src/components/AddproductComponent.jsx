@@ -30,10 +30,8 @@ const AddproductComponent =()=>{
             product_data.append("product_cost",product_cost)
             product_data.append("product_category",product_category)
             product_data.append("product_description",product_description)
-            product_data.append("product_image",product_image)
-            product_data.append("employee_id", auth.user.id)
-            
-            const response = await apiClient.post("/add_product", product_data)
+            product_data.append("product_image", product_image);
+            const response = await apiClient.post("/add_product", product_data);
             console.log(response)
             if (response.status===200)
                 setSuccess(response.data.message)
