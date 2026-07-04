@@ -1,7 +1,11 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback, useMemo } from "react";
+
+const getProductId = (product) => product?.id ?? product?.product_id ?? null;
 
 export const CartContext = createContext({
   cart: [],
+  cartCount: 0,
+  cartTotal: 0,
   addToCart: () => {},
   removeFromCart: () => {},
   clearCart: () => {},
@@ -18,31 +22,37 @@ export const CartProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem("chimera_cart", JSON.stringify(cart));
+    try {
+      localStorage.setItem("chimera_cart", JSON.stringify(cart));
+    } catch (error) {
+      console.error("Unable to save cart to localStorage", error);
+    }
   }, [cart]);
 
-  const addToCart = (product) => {
+  const addToCart = useCallback((product) => {
+    const productId = getProductId(product);
+    if (!productId) return;
+
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
+      const existingItem = prevCart.find((item) => getProductId(item) === productId);
       if (existingItem) {
         return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+          getProductId(item) === productId
+            ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
         );
-      } else {
-        return [...prevCart, { ...product, quantity: 1 }];
       }
+      return [...prevCart, { ...product, quantity: 1 }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
-  };
+  const removeFromCart = useCallback((id) => {
+    setCart((prevCart) => prevCart.filter((item) => getProductId(item) !== id));
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>

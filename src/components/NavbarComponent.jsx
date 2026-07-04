@@ -18,7 +18,7 @@ const NavbarComponent = () => {
     <nav className="navbar navbar-expand-lg">
       <Link className="navbar-brand" to="/">Chimera</Link>
 
-      <button className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <button type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-label="Toggle navigation">
         <span className="navbar-toggler-icon"></span>
       </button>
 
@@ -36,10 +36,12 @@ const NavbarComponent = () => {
                   <Link className="nav-link" to="/">Products</Link>
                   <div className="nav-item dropdown">
                     <button
+                      type="button"
                       className="nav-link dropdown-toggle btn btn-link"
                       id="categoryDropdown"
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
+                      aria-haspopup="true"
                     >
                       Categories
                     </button>
@@ -72,7 +74,7 @@ const NavbarComponent = () => {
 
         <div className="navbar-nav ms-auto">
           {auth.isSignedIn ? (
-            <button className="btn btn-outline-light ms-2" onClick={handleSignOut}>
+            <button type="button" aria-label="Sign out" className="btn btn-outline-light ms-2" onClick={handleSignOut}>
               Sign Out
             </button>
           ) : (

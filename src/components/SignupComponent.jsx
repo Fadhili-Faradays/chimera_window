@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../apiClient";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -30,8 +30,7 @@ const SignupComponent =()=>{
             user_data.append("password", password);
 
             // use axios to send data to server 
-           const response = await axios.post(
-            "https://faradays.alwaysdata.net/api/signup",user_data);
+           const response = await apiClient.post("/signup", user_data);
 
            console.log(response);
            if(response.status === 200){
@@ -101,7 +100,7 @@ const SignupComponent =()=>{
                     }}
                     /> <br />
                     
-                    <button className="btn btn-success">
+                    <button type="submit" className="btn btn-success">
                         Sign Up
                     </button> <br />
 

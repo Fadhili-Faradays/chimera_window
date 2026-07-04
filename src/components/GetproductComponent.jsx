@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useEffect, useState, useContext, useMemo } from "react";
+import { useEffect, useState, useContext, useMemo, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { FavoritesContext } from "../context/FavoritesContext";
 import { CATEGORIES } from "../constants/categories";
+import ProductCard from "./ProductCard";
 
 const GetproductComponent = ()=>{
 
@@ -78,22 +79,10 @@ const GetproductComponent = ()=>{
         : null;
     }, [category]);
 
-    // Update background image based on category
-    useEffect(() => {
-        const bgImage = category && categoryData?.bgImage 
-            ? categoryData.bgImage 
-            : "background.png";
-        document.body.style.backgroundImage = `url('/public/${bgImage}')`;
-        document.body.style.backgroundAttachment = "fixed";
-        document.body.style.backgroundPosition = "center center";
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundRepeat = "no-repeat";
-
-        // Cleanup on unmount
-        return () => {
-            document.body.style.backgroundImage = "url('/public/background.png')";
-        };
-    }, [category, categoryData]);
+    // Compute background URL for wrapper (CSS class handles positioning/sizing)
+    const publicUrl = (process.env.PUBLIC_URL || "").replace(/\/$/, "");
+    const bgImage = category && categoryData?.bgImage ? categoryData.bgImage : "background.png";
+    const bgUrl = `${publicUrl}/${bgImage}`;
 
     const groupedProducts = !category
       ? CATEGORIES.map((cat) => ({
@@ -112,8 +101,27 @@ const GetproductComponent = ()=>{
         )
       : [];
 
+    // Handlers memoized to provide stable refs to ProductCard
+    const handleToggleFavorite = useCallback((product) => {
+      if (isFavorite(product.id)) {
+        removeFromFavorites(product.id);
+      } else {
+        addToFavorites(product);
+      }
+    }, [addToFavorites, removeFromFavorites, isFavorite]);
+
+    const handleAddToCart = useCallback((product) => {
+      addToCart(product);
+    }, [addToCart]);
+
+    const handlePurchase = useCallback((product) => {
+      navigator("/makepayment", { state: { product } });
+    }, [navigator]);
+
+    const bgStyle = { backgroundImage: `url('${bgUrl}')` };
+
     return(
-        <div className="row justify-content-center mt-4">
+      <div className="row justify-content-center mt-4 product-page-bg" style={bgStyle}>
             <div 
               className="category-banner p-4 mb-4 rounded-3 text-start" 
               style={categoryData && categoryData.bgColor ? {
@@ -151,50 +159,16 @@ const GetproductComponent = ()=>{
 
             {category ? (
               filtered_products.map((product) => (
-                <div className="col-md-3 justify-content-center mb-4" key={product.id}>
-                  <div className="card shadow card-margin">
-                    <img src={img_url + product.product_image} alt="" className="product_img mt-4" />
-                    <div className="card-body">
-                      <h5 className="mt-2">{product.product_name}</h5>
-                      <p className="text-muted">{product.product_description}</p>
-                      <b className="text-warning">{product.product_cost}</b>
-                      <br />
-                      <br />
-                      <button
-                        className={`btn me-2 ${isFavorite(product.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                        onClick={() => {
-                          if (isFavorite(product.id)) {
-                            removeFromFavorites(product.id);
-                          } else {
-                            addToFavorites(product);
-                          }
-                        }}
-                      >
-                        {isFavorite(product.id) ? '❤️ Favorited' : '🤍 Add to Favorites'}
-                      </button>
-                      <br />
-                      <br />
-                      {auth.role === 'user' && (
-                        <>
-                          <button className="btn btn-primary me-2" onClick={() => addToCart(product)}>
-                            Add to Cart
-                          </button>
-                          <button
-                            className="btn btn-dark"
-                            onClick={() => {
-                              navigator("/makepayment", { state: { product } });
-                            }}
-                          >
-                            Purchase Now
-                          </button>
-                        </>
-                      )}
-                      {auth.role === 'employee' && (
-                        <p className="text-info">Employee View - Product Management</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  img_url={img_url}
+                  isFavorite={isFavorite}
+                  onToggleFavorite={handleToggleFavorite}
+                  onAddToCart={handleAddToCart}
+                  onPurchase={handlePurchase}
+                  auth={auth}
+                />
               ))
             ) : (
               groupedProducts.map((section) => (
@@ -211,50 +185,16 @@ const GetproductComponent = ()=>{
                   </div>
                   <div className="row">
                     {section.products.map((product) => (
-                      <div className="col-md-3 justify-content-center mb-4" key={`${section.category.value}-${product.id}`}>
-                        <div className="card shadow card-margin">
-                          <img src={img_url + product.product_image} alt="" className="product_img mt-4" />
-                          <div className="card-body">
-                            <h5 className="mt-2">{product.product_name}</h5>
-                            <p className="text-muted">{product.product_description}</p>
-                            <b className="text-warning">{product.product_cost}</b>
-                            <br />
-                            <br />
-                            <button
-                              className={`btn me-2 ${isFavorite(product.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                              onClick={() => {
-                                if (isFavorite(product.id)) {
-                                  removeFromFavorites(product.id);
-                                } else {
-                                  addToFavorites(product);
-                                }
-                              }}
-                            >
-                              {isFavorite(product.id) ? '❤️ Favorited' : '🤍 Add to Favorites'}
-                            </button>
-                            <br />
-                            <br />
-                            {auth.role === 'user' && (
-                              <>
-                                <button className="btn btn-primary me-2" onClick={() => addToCart(product)}>
-                                  Add to Cart
-                                </button>
-                                <button
-                                  className="btn btn-dark"
-                                  onClick={() => {
-                                    navigator("/makepayment", { state: { product } });
-                                  }}
-                                >
-                                  Purchase Now
-                                </button>
-                              </>
-                            )}
-                            {auth.role === 'employee' && (
-                              <p className="text-info">Employee View - Product Management</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <ProductCard
+                        key={`${section.category.value}-${product.id}`}
+                        product={product}
+                        img_url={img_url}
+                        isFavorite={isFavorite}
+                        onToggleFavorite={handleToggleFavorite}
+                        onAddToCart={handleAddToCart}
+                        onPurchase={handlePurchase}
+                        auth={auth}
+                      />
                     ))}
                   </div>
                 </div>
@@ -269,50 +209,16 @@ const GetproductComponent = ()=>{
                 </div>
                 <div className="row">
                   {uncategorizedProducts.map((product) => (
-                    <div className="col-md-3 justify-content-center mb-4" key={`other-${product.id}`}>
-                      <div className="card shadow card-margin">
-                        <img src={img_url + product.product_image} alt="" className="product_img mt-4" />
-                        <div className="card-body">
-                          <h5 className="mt-2">{product.product_name}</h5>
-                          <p className="text-muted">{product.product_description}</p>
-                          <b className="text-warning">{product.product_cost}</b>
-                          <br />
-                          <br />
-                          <button
-                            className={`btn me-2 ${isFavorite(product.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                            onClick={() => {
-                              if (isFavorite(product.id)) {
-                                removeFromFavorites(product.id);
-                              } else {
-                                addToFavorites(product);
-                              }
-                            }}
-                          >
-                            {isFavorite(product.id) ? '❤️ Favorited' : '🤍 Add to Favorites'}
-                          </button>
-                          <br />
-                          <br />
-                          {auth.role === 'user' && (
-                            <>
-                              <button className="btn btn-primary me-2" onClick={() => addToCart(product)}>
-                                Add to Cart
-                              </button>
-                              <button
-                                className="btn btn-dark"
-                                onClick={() => {
-                                  navigator("/makepayment", { state: { product } });
-                                }}
-                              >
-                                Purchase Now
-                              </button>
-                            </>
-                          )}
-                          {auth.role === 'employee' && (
-                            <p className="text-info">Employee View - Product Management</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <ProductCard
+                      key={`other-${product.id}`}
+                      product={product}
+                      img_url={img_url}
+                      isFavorite={isFavorite}
+                      onToggleFavorite={handleToggleFavorite}
+                      onAddToCart={handleAddToCart}
+                      onPurchase={handlePurchase}
+                      auth={auth}
+                    />
                   ))}
                 </div>
               </div>

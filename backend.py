@@ -6,17 +6,24 @@ import requests
 import datetime
 import base64
 from requests.auth import HTTPBasicAuth
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-CORS(app)
-app.config["UPLOAD_FOLDER"] = "static/images"
 
-# Database configuration
-DB_HOST = "mysql-faradays.alwaysdata.net"
-DB_USER = "faradays"
-DB_PASSWORD = "modcom2026"
-USER_DB = "faradays_sokogarden"
-EMPLOYEE_DB = "faradays_employee_sokogarden"  # Update this to your employee database name
+JWT_SECRET = os.getenv("JWT_SECRET", "default-secure-key-change-me")
+JWT_EXPIRATION_SECONDS = int(os.getenv("JWT_EXPIRATION_SECONDS", 3600))
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+
+DB_HOST = os.getenv("DB_HOST", "mysql-faradays.alwaysdata.net")
+DB_USER = os.getenv("DB_USER", "faradays")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "modcom2026")
+USER_DB = os.getenv("USER_DB", "faradays_sokogarden")
+EMPLOYEE_DB = os.getenv("EMPLOYEE_DB", "faradays_employee_sokogarden")
+
+app.config["SECRET_KEY"] = JWT_SECRET
+app.config["UPLOAD_FOLDER"] = "static/images"
+CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -38,6 +45,48 @@ def get_request_data():
     return request.form
 
 
+def get_token_serializer():
+    return URLSafeTimedSerializer(JWT_SECRET, salt="auth-token")
+
+
+def generate_auth_token(data):
+    return get_token_serializer().dumps(data)
+
+
+def verify_auth_token(token):
+    try:
+        return get_token_serializer().loads(token, max_age=JWT_EXPIRATION_SECONDS)
+    except (SignatureExpired, BadSignature):
+        return None
+
+
+def get_request_token():
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None
+    return auth_header.split(" ", 1)[1]
+
+
+def authorize(required_role=None):
+    token = get_request_token()
+    payload = verify_auth_token(token) if token else None
+    if not payload:
+        return None
+    if required_role and payload.get("role") != required_role:
+        return None
+    return payload
+
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://faradays.alwaysdata.net; connect-src 'self' https://faradays.alwaysdata.net;"
+    return response
+
+
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = get_request_data()
@@ -52,8 +101,15 @@ def signup():
     connection = get_db_connection("user")
     cursor = connection.cursor()
 
+    cursor.execute("SELECT user_id FROM users WHERE email=%s", (email,))
+    if cursor.fetchone():
+        cursor.close()
+        connection.close()
+        return jsonify({"message": "A user with this email already exists."}), 409
+
+    password_hash = generate_password_hash(password)
     sql = "INSERT INTO users (username, email, phone, password) VALUES (%s, %s, %s, %s)"
-    cursor.execute(sql, (username, email, phone, password))
+    cursor.execute(sql, (username, email, phone, password_hash))
     connection.commit()
     cursor.close()
     connection.close()
@@ -83,31 +139,43 @@ def _signin(role):
     cursor = connection.cursor()
 
     if role == "employee":
-        sql = "SELECT employee_id AS id, username, email, phone FROM employees WHERE email=%s AND password=%s"
+        sql = "SELECT employee_id AS id, username, email, phone, password FROM employees WHERE email=%s"
     else:
-        sql = "SELECT user_id AS id, username, email, phone FROM users WHERE email=%s AND password=%s"
+        sql = "SELECT user_id AS id, username, email, phone, password FROM users WHERE email=%s"
 
-    cursor.execute(sql, (email, password))
+    cursor.execute(sql, (email,))
     user = cursor.fetchone()
     cursor.close()
     connection.close()
 
-    if not user:
+    if not user or not check_password_hash(user.get("password", ""), password):
         return jsonify({"message": "Invalid credentials"}), 401
 
-    return jsonify({"message": "Login successful", "user": user, "token": ""})
+    user_payload = {
+        "id": user["id"],
+        "email": user["email"],
+        "role": role,
+    }
+    token = generate_auth_token(user_payload)
+    user.pop("password", None)
+
+    return jsonify({"message": "Login successful", "user": user, "token": token})
 
 
 @app.route("/api/add_product", methods=["POST"])
 def add_product():
+    auth_payload = authorize("employee")
+    if not auth_payload:
+        return jsonify({"message": "Unauthorized"}), 401
+
     product_name = request.form.get("product_name")
     product_cost = request.form.get("product_cost")
     product_category = request.form.get("product_category")
     product_description = request.form.get("product_description")
     product_image = request.files.get("product_image")
-    employee_id = request.form.get("employee_id")
+    employee_id = auth_payload.get("id")
 
-    if not product_name or not product_cost or not product_category or not product_description or not product_image or not employee_id:
+    if not product_name or not product_cost or not product_category or not product_description or not product_image:
         return jsonify({"message": "All product fields are required."}), 400
 
     image_name = product_image.filename
@@ -148,10 +216,11 @@ def get_products():
 
 @app.route("/api/user_account", methods=["GET"])
 def user_account():
-    email = request.args.get("email")
-    if not email:
-        return jsonify({"message": "Email is required."}), 400
+    auth_payload = authorize("user")
+    if not auth_payload:
+        return jsonify({"message": "Unauthorized"}), 401
 
+    email = auth_payload.get("email")
     connection = get_db_connection("user")
     cursor = connection.cursor()
     cursor.execute("SELECT user_id AS id, username, email, phone FROM users WHERE email=%s", (email,))
@@ -170,10 +239,11 @@ def user_account():
 
 @app.route("/api/employee_account", methods=["GET"])
 def employee_account():
-    email = request.args.get("email")
-    if not email:
-        return jsonify({"message": "Email is required."}), 400
+    auth_payload = authorize("employee")
+    if not auth_payload:
+        return jsonify({"message": "Unauthorized"}), 401
 
+    email = auth_payload.get("email")
     connection = get_db_connection("employee")
     cursor = connection.cursor()
     cursor.execute("SELECT employee_id AS id, username, email, phone FROM employees WHERE email=%s", (email,))
@@ -238,4 +308,5 @@ def mpesa_payment():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug_mode)

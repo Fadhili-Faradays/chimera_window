@@ -1,22 +1,23 @@
 import './App.css';
+import React, { Suspense, useContext } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
-import GetproductComponent from './components/GetproductComponent';
-import AddproductComponent from './components/AddproductComponent';
-import EmployeeCatalogueComponent from './components/EmployeeCatalogueComponent';
-import SigninComponent from './components/SigninComponent';
-import SignupComponent from './components/SignupComponent';
-import MakepaymentComponent from './components/Makepayment';
-import NavbarComponent from './components/NavbarComponent';
-import AccountComponent from './components/AccountComponent';
-import CartComponent from './components/CartComponent';
-import FavoritesComponent from './components/FavoritesComponent';
-import FooterComponent from './components/FooterComponent';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
-import { useContext } from 'react';
+
+const GetproductComponent = React.lazy(() => import('./components/GetproductComponent'));
+const AddproductComponent = React.lazy(() => import('./components/AddproductComponent'));
+const EmployeeCatalogueComponent = React.lazy(() => import('./components/EmployeeCatalogueComponent'));
+const SigninComponent = React.lazy(() => import('./components/SigninComponent'));
+const SignupComponent = React.lazy(() => import('./components/SignupComponent'));
+const MakepaymentComponent = React.lazy(() => import('./components/Makepayment'));
+const NavbarComponent = React.lazy(() => import('./components/NavbarComponent'));
+const AccountComponent = React.lazy(() => import('./components/AccountComponent'));
+const CartComponent = React.lazy(() => import('./components/CartComponent'));
+const FavoritesComponent = React.lazy(() => import('./components/FavoritesComponent'));
+const FooterComponent = React.lazy(() => import('./components/FooterComponent'));
 
 const RequireAuth = ({ children }) => {
   const { auth } = useContext(AuthContext);
@@ -45,7 +46,8 @@ function App() {
             
               <div className="container-fluid">
               <div className="App">
-                <NavbarComponent />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <NavbarComponent />
                 <header className="App-header">
                   <h1>Chimera - Window Shopping Online</h1>
                 </header>
@@ -95,7 +97,8 @@ function App() {
                   } />
                   <Route path='*' element={<Navigate to='/' replace />} />
                 </Routes>
-                <FooterComponent />
+                  <FooterComponent />
+                </Suspense>
               </div>
             </div>
            </FavoritesProvider>

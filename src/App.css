@@ -24,6 +24,14 @@ body {
   background: url('/public/background.png') center center / cover no-repeat fixed;
 }
 
+/* Background wrapper class for product pages. Use inline style to set background-image URL. */
+.product-page-bg {
+  background-attachment: fixed;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../apiClient";
 import { useState, useContext } from "react";
 import { CATEGORIES } from "../constants/categories";
 import { AuthContext } from "../context/AuthContext";
@@ -33,9 +33,7 @@ const AddproductComponent =()=>{
             product_data.append("product_image",product_image)
             product_data.append("employee_id", auth.user.id)
             
-            const response = await axios.post(
-                "https://faradays.alwaysdata.net/api/add_product", product_data
-            )
+            const response = await apiClient.post("/add_product", product_data)
             console.log(response)
             if (response.status===200)
                 setSuccess(response.data.message)
@@ -129,7 +127,7 @@ const AddproductComponent =()=>{
                     />
                     <br />
 
-                    <button className="btn btn-success">Submit </button>
+                    <button type="submit" className="btn btn-success">Submit </button>
                 </form>
             </div>
 

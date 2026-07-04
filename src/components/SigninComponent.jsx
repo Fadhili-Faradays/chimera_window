@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../apiClient";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -24,7 +24,7 @@ const SigninComponent = () => {
         : "https://faradays.alwaysdata.net/api/user_signin";
 
     try {
-      const response = await axios.post(endpoint, { email, password });
+      const response = await apiClient.post(endpoint.replace("https://faradays.alwaysdata.net/api", ""), { email, password });
 
       if (response.status === 200) {
         const payload = response.data || {};
@@ -89,7 +89,7 @@ const SigninComponent = () => {
           />
           <br />
 
-          <button className="btn btn-success">Sign In</button>
+          <button type="submit" className="btn btn-success">Sign In</button>
           <br />
           <Link to="/signup">Need an account? Sign Up</Link>
         </form>

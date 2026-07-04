@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../apiClient";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 
@@ -22,12 +22,7 @@ const AccountComponent = () => {
           : "https://faradays.alwaysdata.net/api/user_account";
 
       try {
-        const response = await axios.get(url, {
-          params: { email: auth.user?.email },
-          headers: auth.token
-            ? { Authorization: `Bearer ${auth.token}` }
-            : {},
-        });
+        const response = await apiClient.get(url.replace("https://faradays.alwaysdata.net/api", ""));
 
         if (response.status === 200 && response.data) {
           setProfile(response.data.profile || auth.user || {});

@@ -53,8 +53,8 @@ const MakepaymentComponent =()=>{
                 <div key={index} className="col-md-3 mb-3">
                     <img 
                     src={img_url + item.product_image} 
-                    alt="" 
-                    className="rounded img-thumbnail" />
+                    alt={item.product_name || 'Product image'} 
+                    className="rounded img-thumbnail" loading="lazy" />
                     <h3 className="text-dark">{item.product_name}</h3>
                     <h3 className="text-primary">{item.product_category}</h3>
                     <p className="text-muted">{item.product_description}</p>
@@ -86,7 +86,7 @@ const MakepaymentComponent =()=>{
                      }}
                       />
                         <br />
-                      <button className="btn btn-dark">Pay Now</button>
+                      <button type="submit" className="btn btn-dark">Pay Now</button>
                 </form>
             </div>
         </div>
