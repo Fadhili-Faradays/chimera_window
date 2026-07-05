@@ -5,13 +5,21 @@ import os
 import requests
 import datetime
 import base64
+import re
 from requests.auth import HTTPBasicAuth
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 
 app = Flask(__name__)
 
-JWT_SECRET = os.getenv("JWT_SECRET", "default-secure-key-change-me")
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET must be set in the environment for secure authentication.")
+
 JWT_EXPIRATION_SECONDS = int(os.getenv("JWT_EXPIRATION_SECONDS", 3600))
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
 
@@ -23,7 +31,8 @@ EMPLOYEE_DB = os.getenv("EMPLOYEE_DB", "faradays_employee_sokogarden")
 
 app.config["SECRET_KEY"] = JWT_SECRET
 app.config["UPLOAD_FOLDER"] = "static/images"
-CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
+CORS(app, origins=CORS_ORIGINS, supports_credentials=False)
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -83,8 +92,14 @@ def set_security_headers(response):
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://faradays.alwaysdata.net; connect-src 'self' https://faradays.alwaysdata.net;"
     return response
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({"message": "Uploaded file is too large. Maximum allowed size is 5 MB."}), 413
 
 
 @app.route("/api/signup", methods=["POST"])
@@ -97,6 +112,12 @@ def signup():
 
     if not username or not email or not phone or not password:
         return jsonify({"message": "All fields are required."}), 400
+
+    if len(password) < 8:
+        return jsonify({"message": "Password must be at least 8 characters long."}), 400
+
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        return jsonify({"message": "Invalid email address."}), 400
 
     connection = get_db_connection("user")
     cursor = connection.cursor()
@@ -178,7 +199,19 @@ def add_product():
     if not product_name or not product_cost or not product_category or not product_description or not product_image:
         return jsonify({"message": "All product fields are required."}), 400
 
-    image_name = product_image.filename
+    try:
+        product_cost_value = float(product_cost)
+        if product_cost_value <= 0:
+            raise ValueError()
+    except ValueError:
+        return jsonify({"message": "Product cost must be a valid positive number."}), 400
+
+    image_name = secure_filename(product_image.filename)
+    if not image_name or "." not in image_name or image_name.rsplit(".", 1)[1].lower() not in ALLOWED_IMAGE_EXTENSIONS:
+        return jsonify({"message": "Invalid image format. Allowed types are png, jpg, jpeg, gif, webp."}), 400
+
+    timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    image_name = f"{timestamp}_{image_name}"
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], image_name)
     product_image.save(file_path)
 
@@ -220,10 +253,10 @@ def user_account():
     if not auth_payload:
         return jsonify({"message": "Unauthorized"}), 401
 
-    email = auth_payload.get("email")
+    user_id = auth_payload.get("id")
     connection = get_db_connection("user")
     cursor = connection.cursor()
-    cursor.execute("SELECT user_id AS id, username, email, phone FROM users WHERE email=%s", (email,))
+    cursor.execute("SELECT user_id AS id, username, email, phone FROM users WHERE user_id=%s", (user_id,))
     user = cursor.fetchone()
 
     if not user:
@@ -243,10 +276,10 @@ def employee_account():
     if not auth_payload:
         return jsonify({"message": "Unauthorized"}), 401
 
-    email = auth_payload.get("email")
+    employee_id = auth_payload.get("id")
     connection = get_db_connection("employee")
     cursor = connection.cursor()
-    cursor.execute("SELECT employee_id AS id, username, email, phone FROM employees WHERE email=%s", (email,))
+    cursor.execute("SELECT employee_id AS id, username, email, phone FROM employees WHERE employee_id=%s", (employee_id,))
     employee = cursor.fetchone()
 
     if not employee:
@@ -268,17 +301,24 @@ def mpesa_payment():
     if not amount or not phone:
         return jsonify({"message": "Amount and phone are required."}), 400
 
-    consumer_key = "GTWADFxIpUfDoNikNGqq1C3023evM6UH"
-    consumer_secret = "amFbAoUByPV2rM5A"
+    consumer_key = os.getenv("MPESA_CONSUMER_KEY")
+    consumer_secret = os.getenv("MPESA_CONSUMER_SECRET")
+    passkey = os.getenv("MPESA_PASSKEY")
+    business_short_code = os.getenv("MPESA_SHORT_CODE")
+    callback_url = os.getenv("MPESA_CALLBACK_URL")
+
+    if not all([consumer_key, consumer_secret, passkey, business_short_code, callback_url]):
+        return jsonify({"message": "Payment gateway is not configured properly."}), 500
 
     auth_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    token_response = requests.get(auth_url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
-    token_data = token_response.json()
-    access_token = f"Bearer {token_data['access_token']}"
+    token_response = requests.get(auth_url, auth=HTTPBasicAuth(consumer_key, consumer_secret), timeout=10)
+    if token_response.status_code != 200:
+        return jsonify({"message": "Unable to authorize payment gateway."}), 502
 
-    timestamp = datetime.datetime.today().strftime('%Y%m%d%H%M%S')
-    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-    business_short_code = "174379"
+    token_data = token_response.json()
+    access_token = f"Bearer {token_data.get('access_token')}"
+
+    timestamp = datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
     data_to_encode = business_short_code + passkey + timestamp
     encoded = base64.b64encode(data_to_encode.encode())
     password = encoded.decode('utf-8')
@@ -292,7 +332,7 @@ def mpesa_payment():
         "PartyA": phone,
         "PartyB": business_short_code,
         "PhoneNumber": phone,
-        "CallBackURL": "https://modcom.co.ke/api/confirmation.php",
+        "CallBackURL": callback_url,
         "AccountReference": "account",
         "TransactionDesc": "account"
     }
@@ -303,7 +343,10 @@ def mpesa_payment():
     }
 
     url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers, timeout=10)
+    if response.status_code != 200:
+        return jsonify({"message": "Payment request failed.", "details": response.text}), 502
+
     return jsonify({"message": "Please complete payment on your phone.", "mpesa_response": response.json()})
 
 
